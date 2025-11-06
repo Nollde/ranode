@@ -30,9 +30,11 @@ action() {
 
     # Prompt user for input if OUTPUT_DIR and DATA_DIR are not set
     prompt_user() {
-        read -p "Enter the output directory: " user_input1
-        read -p "Enter the input directory: " user_input2
-        if [[ -d $user_input1 && -d $user_input2 ]]; then
+        echo -n "Enter the output directory: "
+        read user_input1
+        echo -n "Enter the input directory: " 
+        read user_input2
+        if [[ -n $user_input1 && -n $user_input2 ]]; then
             export OUTPUT_DIR="$user_input1"
             export DATA_DIR="$user_input2"
         else
@@ -49,15 +51,30 @@ action() {
         prompt_user
     fi
 
-    echo "Using output directory: $OUTPUT_DIR"
-    echo "Using input directory: $DATA_DIR"
+    # If no conda available, activate it
+    if ! command -v conda >/dev/null 2>&1; then
+        if [[ $(hostname) == "KK63XC4R3C" ]]; then
+            eval "$(/Users/nollde/miniforge3/bin/conda shell.bash hook)"
+        elif [[ -d "/opt/homebrew/Caskroom/mambaforge/base/bin/conda" ]]; then
+            eval "$(/opt/homebrew/Caskroom/mambaforge/base/bin/conda shell.bash hook)"
+        elif [[$NERSC_HOST == "perlmutter"]]; then
+            module load python
+        fi
+    fi
 
-    # Load necessary modules and activate conda environment
-    # module load python
-    # conda activate /pscratch/sd/m/mukyu/SBI_RANODE/env/sbi_ranode_env
-    # module load miniconda CUDA/12.1.1 cuDNN/8.9.2.26-CUDA-12.1.1
-    # conda activate /gpfs/gibbs/pi/demers/runze/conda/envs/sbi_ranode_env
+    # If conda env "gbi_ranode" does not exist create it
+    if ! conda env list | grep -q '^gbi_ranode'; then
+        yes | conda create --name gbi_ranode
+        yes | conda env update -n gbi_ranode --file environment_mac.yml
+    fi
 
+    echo ""
+    echo "✓ GBI environment activated!"
+    echo "  Python: $(python --version)"
+    echo "  Environment: ${CONDA_PREFIX}"
+    echo "  Working directory: ${this_dir}"
+    echo "  Output directory: ${OUTPUT_DIR}"
+    echo "  Data directory: ${DATA_DIR}"
 }
 
 action
