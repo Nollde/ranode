@@ -68,7 +68,11 @@ action() {
         yes | conda env update -n gbi_ranode --file environment_mac.yml
     fi
 
+    # Source conda env
     conda activate gbi_ranode
+
+    # Enable autocompletion for law
+    source "$( law completion )" ""
 
     echo ""
     echo "✓ GBI environment activated!"
