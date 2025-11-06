@@ -68,6 +68,8 @@ action() {
         yes | conda env update -n gbi_ranode --file environment_mac.yml
     fi
 
+    conda activate gbi_ranode
+
     echo ""
     echo "✓ GBI environment activated!"
     echo "  Python: $(python --version)"
